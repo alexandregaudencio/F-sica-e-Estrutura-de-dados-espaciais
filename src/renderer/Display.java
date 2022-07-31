@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import javax.swing.JFrame;
 
@@ -12,10 +15,16 @@ public class Display extends Canvas implements Runnable {
 	private Thread thread;
 	private JFrame frame;
 	private static String title = "Scene Renderer";
-	private static final int WIDTH = 800;
-	private static final int HEIGHT = 600;
+	private static final int WIDTH = 1280;
+	private static final int HEIGHT = 720;
 	private static boolean running = false;
+	Circle[] circles;
+	List<Circle> effects = new ArrayList<Circle>();
+	int objects = 3;
+	int maxRadius = 10;
 	
+	Random random = new Random();
+
 	public Display() {
 		this.frame = new JFrame();
 		Dimension szie = new Dimension(WIDTH, HEIGHT);
@@ -31,12 +40,26 @@ public class Display extends Canvas implements Runnable {
 		display.frame.setResizable(false);	
 		display.frame.setVisible(true);	
 		display.start();
+	
 	}
 	
 	public synchronized void start() {
 		running = true;
 		this.thread = new Thread(this, "Display");
 		this.thread.start();
+		circles = new Circle[objects*objects];
+		int count = 0;
+
+		for(int i = 0; i < objects; i++ ) {
+			for(int j = 0; j < objects; j++ ) {
+				int xoffset = 30;
+				int yoffset = 30;
+				circles[count] = new Circle(xoffset+i*xoffset, yoffset+j*yoffset, 
+						random.nextFloat(3), random.nextFloat(3), maxRadius, count);
+				count++;
+			}
+		}
+
 	}
 	
 	public synchronized void stop() {
@@ -55,9 +78,6 @@ public class Display extends Canvas implements Runnable {
 		final double ns = 1000000000.0/60;
 		double delta = 0;
 		int frames = 0;
-		
-		
-		
 				
 		while(running) {
 			long now = System.nanoTime();
@@ -73,12 +93,12 @@ public class Display extends Canvas implements Runnable {
 			if(System.currentTimeMillis() - timer > 1000) {
 				timer += 1000;
 				this.frame.setTitle(title + " | "+frames + " fps");
+				frames = 0;
 			}
 
-			
-			
 		}
 	}
+	
 	
 	private void render() {
 		BufferStrategy bs = this.getBufferStrategy();
@@ -86,18 +106,21 @@ public class Display extends Canvas implements Runnable {
 			this.createBufferStrategy(3);
 			return;
 		}
+		Graphics g = bs.getDrawGraphics();		
+		update(g);
+
+		for(Circle c : circles) {
+			c.drawCircle(g);
+		}
 		
-		Graphics g = bs.getDrawGraphics();
-		
-		//g.setColor(Color.black);
-		//g.fillRect(0, 0, WIDTH, HEIGHT);
-		//
-		//g.setColor(Color.cyan);
-		//g.fillRect(10, 10, 200, 200);
-		
-		//generateSquare(g, Color.yellow, 300, 300, 300, 300);
-		
-		generateCircle(g, Color.blue, 400, 300, 20, 20);
+		if(effects != null) {
+			for(Circle circle : effects) {
+				circle.drawCircle(g);
+			}
+
+		}
+
+
 		generateSquare(g, Color.black, 10, 10, WIDTH-20, HEIGHT-20);
 		g.dispose();
 		bs.show();
@@ -105,6 +128,11 @@ public class Display extends Canvas implements Runnable {
 	}
 	
 	private void update() {
+		for(Circle circle : circles) {
+			circle.move();
+		}
+		
+		CircleCollisionDetection();
 		
 	}
 
@@ -114,10 +142,29 @@ public class Display extends Canvas implements Runnable {
 	}
 	
 	
-	private void generateCircle(Graphics g, Color color, int x, int y, int width, int height)
-	{
-		g.setColor(color);
-		g.fillOval(x, y, width, height);
-		
+	private void CircleCollisionDetection() {
+		for(Circle circle : circles) {
+			for(Circle oCircle : circles) {
+				if(circle != oCircle) {
+					double dx = Math.abs((double)circle.x - (double)oCircle.x);
+					double dy = Math.abs((double)circle.y - (double)oCircle.y);
+					float distance = (float)Math.sqrt(dx*dx+dy*dy);
+
+					if(distance < circle.radius+circle.radius) {
+						float diferenceX = oCircle.x - circle.x;
+						float diferenceY = oCircle.y - circle.y;
+						circle.velx = -diferenceX/maxRadius;
+						circle.vely = -diferenceY/maxRadius;
+
+						Circle effect = new Circle((circle.x+oCircle.x)/2, (circle.y+oCircle.y)/2, 0,0,10, -1);
+						effect.SetColor(Color.red);
+						effects.add(effect);
+						
+				}
+				
+				}
+			}
+		}
 	}
+
 }
