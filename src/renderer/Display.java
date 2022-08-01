@@ -7,7 +7,6 @@ import java.awt.image.BufferStrategy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
 import javax.swing.JFrame;
 
 public class Display extends Canvas implements Runnable {
@@ -15,20 +14,23 @@ public class Display extends Canvas implements Runnable {
 	private Thread thread;
 	private JFrame frame;
 	private static String title = "Scene Renderer";
-	private static final int WIDTH = 1280;
-	private static final int HEIGHT = 720;
+	private static final int WIDTH = 800;
+	private static final int HEIGHT = 800;
 	private static boolean running = false;
 	Circle[] circles;
 	List<Circle> effects = new ArrayList<Circle>();
-	int objects = 3;
+	int objects = 6;
 	int maxRadius = 10;
+	QuadTree quadTree;
+	Dimension dimension;
+	
 	
 	Random random = new Random();
 
 	public Display() {
 		this.frame = new JFrame();
-		Dimension szie = new Dimension(WIDTH, HEIGHT);
-		this.setPreferredSize(szie);
+		dimension = new Dimension(WIDTH, HEIGHT);
+		this.setPreferredSize(dimension);
 	}
 	
 	public static void main(String[] args) {
@@ -37,7 +39,7 @@ public class Display extends Canvas implements Runnable {
 		display.frame.add(display);
 		display.frame.pack();
 		display.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		display.frame.setResizable(false);	
+		display.frame.setResizable(true);	
 		display.frame.setVisible(true);	
 		display.start();
 	
@@ -55,10 +57,12 @@ public class Display extends Canvas implements Runnable {
 				int xoffset = 30;
 				int yoffset = 30;
 				circles[count] = new Circle(xoffset+i*xoffset, yoffset+j*yoffset, 
-						random.nextFloat(3), random.nextFloat(3), maxRadius, count);
+						random.nextFloat(3), random.nextFloat(3), maxRadius, WIDTH);
 				count++;
 			}
 		}
+		
+		quadTree = new QuadTree(new Center(WIDTH/2, HEIGHT/2), new Dimension(WIDTH, HEIGHT));
 
 	}
 	
@@ -106,7 +110,7 @@ public class Display extends Canvas implements Runnable {
 			this.createBufferStrategy(3);
 			return;
 		}
-		Graphics g = bs.getDrawGraphics();		
+		Graphics g = bs.getDrawGraphics();
 		update(g);
 
 		for(Circle c : circles) {
@@ -120,8 +124,9 @@ public class Display extends Canvas implements Runnable {
 
 		}
 
-
+		
 		generateSquare(g, Color.black, 10, 10, WIDTH-20, HEIGHT-20);
+		quadTree.draw(g);
 		g.dispose();
 		bs.show();
 		
@@ -156,7 +161,7 @@ public class Display extends Canvas implements Runnable {
 						circle.velx = -diferenceX/maxRadius;
 						circle.vely = -diferenceY/maxRadius;
 
-						Circle effect = new Circle((circle.x+oCircle.x)/2, (circle.y+oCircle.y)/2, 0,0,10, -1);
+						Circle effect = new Circle((circle.x+oCircle.x)/2, (circle.y+oCircle.y)/2, 0,0,2, WIDTH);
 						effect.SetColor(Color.red);
 						effects.add(effect);
 						

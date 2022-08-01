@@ -16,8 +16,8 @@ public class Circle extends Canvas implements Runnable {
 	public float velx;
 	public float vely;
 	Thread thread;
-	int circleID;
-	
+	float worldDimension;
+
 	public int GetWidth() {
 		return (int)radius*2;
 	}
@@ -30,14 +30,14 @@ public class Circle extends Canvas implements Runnable {
 		this.color = color;
 	}
 	
-	public Circle(float x, float y, float velx, float vely, float radius, int ID) {
-		this.circleID = ID;
+	public Circle(float x, float y, float velx, float vely, float radius, float worldDimension) {
 		this.x = x;
 		this.y = y;
 		this.velx = velx;
 		this.vely = vely;
 		this.radius = radius;
-	    color = Color.black;	
+	    color = Color.black;
+	    this.worldDimension = worldDimension;
 	    
 	}
 	
@@ -45,10 +45,10 @@ public class Circle extends Canvas implements Runnable {
 		x += velx;
 		y += vely;
 
-		if(x <= 10 || x >= 1280-GetWidth()) {
+		if(x <= 10 || x >= worldDimension-GetWidth()) {
 		    velx =  velx*(-1);
 		}
-		if(y <= 10 || y >= 720-GetHeight()) {
+		if(y <= 10 || y >= worldDimension-GetHeight()) {
 			vely =  vely*(-1);
 		}
 	}
