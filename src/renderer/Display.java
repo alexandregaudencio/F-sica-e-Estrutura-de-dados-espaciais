@@ -112,10 +112,15 @@ public class Display extends Canvas implements Runnable {
 		}
 		Graphics g = bs.getDrawGraphics();
 		update(g);
+		
+		
 
 		for(Circle c : circles) {
 			c.drawCircle(g);
 		}
+		
+		quadTree.draw(g);
+		
 		
 		if(effects != null) {
 			for(Circle circle : effects) {
@@ -124,9 +129,7 @@ public class Display extends Canvas implements Runnable {
 
 		}
 
-		
-		generateSquare(g, Color.black, 10, 10, WIDTH-20, HEIGHT-20);
-		quadTree.draw(g);
+		//generateSquare(g, Color.black, 10, 10, WIDTH-20, HEIGHT-20);
 		g.dispose();
 		bs.show();
 		

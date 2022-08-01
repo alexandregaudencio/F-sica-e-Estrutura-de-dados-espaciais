@@ -9,17 +9,14 @@ public class QuadTree extends Canvas{
 
 	public Center center;
 	public Dimension dimension;
-	QuadTree[] leafs = null;
-	QuadTree northWest = null;
-	QuadTree northEast = null;
-	QuadTree southWest = null;
-	QuadTree southEast = null;
+	QuadTree northWest;
+	QuadTree northEast;
+	QuadTree southWest;
+	QuadTree southEast;
 	static int NodeCapacity = 4;
-	static int maxLeafs = 4;
 	Circle[] objects;
 	//região delimitada
 	AABB boudary;
-	Graphics g;
 	
 	
 	public QuadTree(Center center, Dimension dimension) {
@@ -31,8 +28,7 @@ public class QuadTree extends Canvas{
 				center.x+dimension.width/2,
 				center.y+dimension.height/2
 				);
-		this.g = g;
-		subdivide();
+		//subdivide();
 	}
 	
 	public void draw(Graphics g) {
@@ -46,7 +42,6 @@ public class QuadTree extends Canvas{
 			objects[objects.length+1] = circle;
 		
 		} else {
-			subdivide();
 		}
 	}
 	
